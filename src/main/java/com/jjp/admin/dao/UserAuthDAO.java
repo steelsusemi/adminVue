@@ -9,7 +9,7 @@ import com.jjp.admin.vo.UserVo;
 @Repository
 public class UserAuthDAO {
 	
-	private String NAME_SPACE = "com.jjplatform.admin.dao.UserAuthDAO.";
+	private String NAME_SPACE = "com.jjp.admin.dao.UserAuthDAO.";
 	
 	@Autowired
     private SqlSessionTemplate sqlSession;

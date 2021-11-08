@@ -2,21 +2,11 @@ plugins {
 	id 'org.springframework.boot' version '2.5.6'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
-	id "com.github.node-gradle.node" version "2.2.3" 
 }
 
 group = 'com.jjp.admin'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
-
-node { 
-    version = '13.11.0' 
-    npmVersion = '6.14.3' 
-    npmInstallCommand = 'install' 
-    workDir = file('./vuefrnt')
-	npmWorkDir = file('./vuefrnt')
-	nodeModulesDir = file('./vuefrnt')
-} 
 
 configurations {
 	compileOnly {
@@ -38,6 +28,8 @@ dependencies {
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
 	implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
 
+    implementation 'org.springframework.boot:spring-boot-starter-aop:2.5.6'
+	
 	/* MariaDB */
 	implementation 'org.mariadb.jdbc:mariadb-java-client'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
@@ -51,37 +43,6 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	// testImplementation 'org.springframework.security:spring-security-test'
 }
-
-// task1. 기존 vuejs 프로젝트 빌드 결과물 제거
-/*
-1) Vuejs 프로젝트의 새 빌드 결과물을 생성하기 위해서 기존에 생성되어 있던 빌드 결과물을 제거해줍니다.
-2) Vuejs 프로젝트를 빌드하기 전에 packjage.json파일에 명시된 의존 라이브러리들을 최신화 하기위해서 
-기존 node_modules에 저장되어 있는 library들을 제거해줍니다. 
-*/
-task deleteVueArtifact(type: Delete) {
-    delete "src/main/resources/static"
-}
-
-// task2. Vuejs 프로젝트의 의존 라이브러리 최신화 (npm install)
-/* 
-기본적으로 Gradle Node Plugin에 npmInstall이라는 task가 내장되어 있기 때문에 별도의 task를 생성하지 않고
-내장된 npmInstall task를 불러 사용하면 됩니다.
-가끔 예전 버전에서 내장된 npmInstall task가 동작 오류를 발생시킬 때가 있어 별도 정의해서 사용하기도 합니다.
-별도 정의가 필요하다면 아래처럼 생성해서 사용하시면 됩니다.^^ 
-*/
-/*task installNpm(type: NpmTask) {
-    args = ['install']
-}*/
-
-// task3. vuejs 프로젝트 빌드 
-// dependsOn은 해당 task를 실행하기 전에 선 수행해야하는 task 목록을 지정하여 선 수행시켜주는 역할을 합니다. 
-// dependsOn에 명시된 task들은 명시된 순서대로 수행됩니다. 
-task npmBuild(type: NpmTask, dependsOn: ['deleteVueArtifact', 'npmInstall']) { 
-    args = ["run","build"] 
-}
-
-// gradle build 시 수행되는 processResources task가 실행되기 전에 npmBuild task를 실행하라. 
-processResources.dependsOn 'npmBuild' 
 
 test {
 	useJUnitPlatform()

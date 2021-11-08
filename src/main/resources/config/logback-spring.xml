@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+    <!-- Spring-boot 기본 logback 설정 -->
+    <!-- <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" /> -->
+	
+	 <!-- The rendering class that the color log depends on -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
+    
+	<!-- Color log format -->
+    <property name="CONSOLE_LOG_PATTERN" value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}" />
+    
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <!-- <pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%F]%M\(%L\) : %m%n</pattern> -->
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </layout>
+    </appender>
+    
+    <!-- 변수 지정 -->
+    <property name="LOG_DIR" value="C:/logs" />
+    <property name="DB_LOG_DIR" value="config" />
+    <property name="LOG_PATH_NAME" value="${LOG_DIR}/server_${spring.profiles.active}.log" />
+    
+    <!-- 서버에따른 yml 조회 -->
+    <property resource="${DB_LOG_DIR}/application-${spring.profiles.active}.properties" />
+    <logger name="com.ulisesbocchio.jasyptspringboot" level="ALL"/>
+
+    <springProperty scope="context" name="dbUrl" source="spring.datasource.url"/>
+    <springProperty scope="context" name="dbUsername" source="spring.datasource.username"/>
+    <springProperty scope="context" name="dbPassword" source="spring.datasource.password"/>
+
+    <!-- <appender name="MyDbAppender" class="ch.qos.logback.classic.db.DBAppender"> -->
+    <appender name="MyDbAppender" class="com.jjp.admin.log.LogDBAppender">
+        <connectionSource class="ch.qos.logback.core.db.DriverManagerConnectionSource">
+            <driverClass>net.sf.log4jdbc.sql.jdbcapi.DriverSpy</driverClass>
+            <url>${dbUrl}</url>
+            <user>${dbUsername}</user>
+            <password>${dbPassword}</password>
+        </connectionSource>
+    </appender>
+
+    <!-- FILE Appender -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH_NAME}</file>
+        <!-- 일자별로 로그파일 적용하기 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH_NAME}.%d{yyyyMMdd}</fileNamePattern>
+            <maxHistory>60</maxHistory> <!-- 일자별 백업파일의 보관기간 -->
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%F]%M\(%L\) : %m%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!--에러 일 경우 파일에 로그를 남깁니다--> 
+    <appender name="Error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>error</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <file>${LOG_DIR}/error/server-error.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%-5level] %logger{36} - %msg%n
+            </Pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/error/back/server-error.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- log4jdbc-log4j2 -->
+    <logger name="jdbc.sqlonly"        level="INFO" additivity="false"/>
+    <logger name="jdbc.sqltiming"      level="OFF" additivity="false"/>
+    <logger name="jdbc.audit"          level="OFF" additivity="false"/>
+    <logger name="jdbc.resultset"      level="OFF" additivity="false"/>
+    <logger name="jdbc.resultsettable" level="OFF" additivity="false"/>
+    <logger name="jdbc.connection"     level="OFF" additivity="false"/>
+    
+    <logger name="com.jjplatform.admin" level="INFO"></logger>
+    <logger name="org.springframework.security" level="INFO"></logger>
+    
+    <!-- <logger name="com.jjplatform.admin" level="Error" additivity="false">
+    	<appender-ref ref="MyDbAppender" />
+    </logger> -->
+    
+    <!-- TRACE > DEBUG > INFO > WARN > ERROR, 대소문자 구분 안함
+    profile 을 읽어서 appender 을 설정할수 있다.(phase별 파일을 안만들어도 됨) -->
+    <springProfile name="local,dev">
+        <root level="INFO"  additivity="false">
+            <appender-ref ref="FILE" />
+            <appender-ref ref="STDOUT" />
+            <appender-ref ref="MyDbAppender" />
+        </root>
+    </springProfile>
+    <springProfile name="prod"  additivity="false">
+        <root level="INFO">
+            <appender-ref ref="FILE" />
+            <appender-ref ref="STDOUT" />
+            <!-- <appender-ref ref="MyDbAppender" /> -->
+        </root>
+    </springProfile>
+    
+    <!-- <include resource="classpath:/logging/base.xml"/>
+    <logger name="org.springframework.web" level="info"/> -->
+</configuration>

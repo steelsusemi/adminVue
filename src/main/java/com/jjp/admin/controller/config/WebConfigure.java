@@ -1,15 +1,13 @@
 package com.jjp.admin.controller.config;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.resource.PathResourceResolver;
+
+import com.jjp.admin.intercept.LoggerInterceptor;
 
 @Configuration
 public class WebConfigure implements WebMvcConfigurer{
@@ -18,31 +16,31 @@ public class WebConfigure implements WebMvcConfigurer{
 ////	private final List<String> PASS_URL = Arrays.asList("/jjpf/**");  
 //	 
 	//인터셉터 주소 세팅
-//	@Override
-//	public void addInterceptors(InterceptorRegistry registry) {
-//		registry.addInterceptor(new LoggerInterceptor()).excludePathPatterns(EXCEPT_URL);
-//	}
-	
 	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-//	    registry.addResourceHandler("/css/**", "/js/**")
-//	    		.addResourceLocations("/css/", "/js/")
-//	            .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
-//	            .resourceChain(false)
-//	            .addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
-		registry.addResourceHandler("/**")
-				.addResourceLocations("classpath:/templates/")
-				.resourceChain(true)
-				.addResolver(new PathResourceResolver() {
-					@Override
-					protected Resource getResource(String resourcePath, Resource location) throws IOException {
-						Resource requestedResource = location.createRelative(resourcePath);
-						
-						return requestedResource.exists() && requestedResource.isReadable()
-								? requestedResource : new ClassPathResource("/templates/login.html");
-					}
-				});
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(new LoggerInterceptor()).excludePathPatterns(EXCEPT_URL);
 	}
+	
+//	@Override
+//	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+////	    registry.addResourceHandler("/css/**", "/js/**")
+////	    		.addResourceLocations("/css/", "/js/")
+////	            .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
+////	            .resourceChain(false)
+////	            .addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
+//		registry.addResourceHandler("/**")
+//				.addResourceLocations("classpath:/static/")
+//				.resourceChain(true)
+//				.addResolver(new PathResourceResolver() {
+//					@Override
+//					protected Resource getResource(String resourcePath, Resource location) throws IOException {
+//						Resource requestedResource = location.createRelative(resourcePath);
+//						
+//						return requestedResource.exists() && requestedResource.isReadable()
+//								? requestedResource : new ClassPathResource("/templates/login.html");
+//					}
+//				});
+//	}
 	
 //	@Bean
 //    public LocaleResolver localeResolver() {

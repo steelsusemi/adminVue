@@ -1,6 +1,5 @@
 package com.jjp.admin.vo;
 
-
 import com.jjp.admin.comm.vo.commonVo;
 
 import lombok.Data;

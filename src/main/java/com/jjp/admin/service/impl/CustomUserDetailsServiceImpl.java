@@ -6,13 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.jjp.admin.aop.LoggerAspect;
 import com.jjp.admin.comm.vo.CustomUserDetails;
 import com.jjp.admin.dao.UserAuthDAO;
 import com.jjp.admin.vo.UserVo;
 
 @Service("customUserDetailsServiceImpl")
 public class CustomUserDetailsServiceImpl {
-	private static final Logger log = LoggerFactory.getLogger(CustomUserDetailsServiceImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(LoggerAspect.class);
 	
 	@Autowired
     private UserAuthDAO userAuthDAO;
